@@ -85,6 +85,6 @@ if __name__ == "__main__":
     subprocess.run(["mypy", "--config-file", "mypy.ini", tem1_all_python_filename])
     subprocess.run(["mypy", "--config-file", "mypy.ini", tem2_all_python_filename])
 
-    os.makedirs("Y:/DROPBOX/Temmy/script_packages", exist_ok=True)
-    shutil.copyfile(tem1_package_name, f"Y:/DROPBOX/Temmy/{tem1_package_name}")
-    shutil.copyfile(tem2_package_name, f"Y:/DROPBOX/Temmy/{tem2_package_name}")
+    os.makedirs("T:/Temmy/script_packages", exist_ok=True)
+    shutil.copyfile(tem1_package_name, f"T:/Temmy/{tem1_package_name}")
+    shutil.copyfile(tem2_package_name, f"T:/Temmy/{tem2_package_name}")

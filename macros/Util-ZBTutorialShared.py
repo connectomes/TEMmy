@@ -46,6 +46,8 @@ SpotSize3:int = 3
 
 ManuallyCheckCenterPoint:Step = DependingOnYesNo("Does this snapshot show the center point correctly and visibly?", DoAutomatically(lambda: print("")), TellOperatorSEM("Manually correct and re-take the center point image. When you click 'Next step', it will be saved."))
 
+ManuallyCheckControlPoints:Step = DependingOnYesNo("Does this snapshot show the control points correctly and visibly?", DoAutomatically(lambda: print("")), TellOperatorSEM("Manually correct and re-take the control points image. When you click 'Next step', it will be saved."))
+
 def OpenLastSnapshot(recap:bool, investigator:str, volume:str, mag:int) -> Step:
     def step() -> None:
         if recap:
@@ -58,13 +60,28 @@ def OpenLastSnapshot(recap:bool, investigator:str, volume:str, mag:int) -> Step:
                 TellOperator(f"Open DROPBOX/TEMSnapshots and open the latest {investigator} {volume} snapshot at x{mag}")()
     return step
 
+def SwitchTo600MagSteps(recap:bool, investigator:str, volume:str, Mag:int, MagIndex:int, SpotSize:int, ChangeAperture:bool, CenterAperture:bool, CenterPoint:bool) -> list[Step]:
+    return [
+        DoAutomatically(lambda: SetBeamBlank(True)),
+        DoAutomatically(lambda: SetMagIndex(MagIndex)),
+        DoAutomatically(lambda: SetSpotSize(SpotSize))
+    ] + [(
+        TellOperatorTEM("Ensure first aperture is in."))]+([
+        OpenLastSnapshot(recap, investigator, volume, Mag),
+        DoAutomatically(Record),
+        TellOperatorSEM(f"Center over 4 control points at a time. {newline} Find the  control points at {Mag}x, and use 'Move Item' to relocate the control points to the correct location."),
+        DoAutomatically(Record),
+        ManuallyCheckControlPoints,
+        DoAutomatically(lambda: TakeSnapshotWithNotes("", False,NumberDuplicates=True)),
+    ] if CenterPoint else [])
+
 def SwitchToHighMagSteps(recap:bool, investigator:str, volume:str, Mag:int, MagIndex:int, SpotSize:int, ChangeAperture:bool, CenterAperture:bool, CenterPoint:bool, FocusSteps:list[Step]) -> list[Step]:
     return [
         DoAutomatically(lambda: SetBeamBlank(True)),
         DoAutomatically(lambda: SetMagIndex(MagIndex)),
         DoAutomatically(lambda: SetSpotSize(SpotSize))
     ] + ([
-        TellOperatorTEM("Insert the second aperture."),
+        TellOperatorTEM("Ensure second aperture is in."),
         DependingOnScope(TellOperatorTEM("Spread the beam by several turns (by turning the 'brightness' knob clockwise.)"), DoNothing),
         DoAutomatically(ScreenDown),
         TellOperatorTEM("Use the X/Y dials on the upper left side of the microscope column to center the aperture.")
@@ -76,11 +93,11 @@ def SwitchToHighMagSteps(recap:bool, investigator:str, volume:str, Mag:int, MagI
         DoAutomatically(Record)
     ] + ([
         OpenLastSnapshot(recap, investigator, volume, Mag),
-        TellOperatorSEM(f"Find the center point at {Mag}x, and use 'Move Item' to relocate the centerpoint marker to the correct location."),
+        TellOperatorSEM(f"Find the center or control points at {Mag}x, and use 'Move Item' to relocate the centerpoint/ control points to the correct location."),
         DoAutomatically(lambda: MoveToNavItem()),
         DoAutomatically(Record),
         ManuallyCheckCenterPoint,
-        DoAutomatically(lambda: TakeSnapshotWithNotes("", False)),
+        DoAutomatically(lambda: TakeSnapshotWithNotes("", False,NumberDuplicates=False)),
     ] if CenterPoint else [])
 
 FastFocusSteps:list[Step] = [

@@ -2,7 +2,7 @@
 ScopeName = "TEM2"
 
 # Globally set the variable $DropboxPath
-DropboxPath = "Y:/Dropbox"
+DropboxPath = "Y:/"
 
 # Globally set the variable $DataPath
 DataPath = "G:/"
